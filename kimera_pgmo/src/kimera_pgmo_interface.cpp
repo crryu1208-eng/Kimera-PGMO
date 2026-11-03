@@ -241,8 +241,18 @@ ProcessPoseGraphStatus KimeraPgmoInterface::processIncrementalPoseGraph(
       }
 
       deformation_graph_->updatePoseGraphInitialGuess(from_key, to_key, measure);
-      deformation_graph_->processNewBetween(
-          from_key, to_key, measure, config_.odom_variance);
+      // an edge may carry its own (larger) uncertainty, e.g. odometry across a tracking
+      // reset; unset covariances (ROS: negative, or an all-zero message default) keep the
+      // configured odometry variance
+      double odom_variance = config_.odom_variance;
+      const double edge_variance = pg_edge.covariance.diagonal().maxCoeff();
+      if (pg_edge.covariance(0, 0) > 0.0 && edge_variance > odom_variance) {
+        odom_variance = edge_variance;
+        SPARK_LOG(INFO) << "Odometry edge " << gtsam::DefaultKeyFormatter(from_key) << " -> "
+                        << gtsam::DefaultKeyFormatter(to_key)
+                        << " uses its own variance " << odom_variance;
+      }
+      deformation_graph_->processNewBetween(from_key, to_key, measure, odom_variance);
 
     } else if (pg_edge.type == pose_graph_tools::PoseGraphEdge::LOOPCLOSE) {
       if (!keyed_stamps_.count(from_key) || !keyed_stamps_.count(to_key)) {
