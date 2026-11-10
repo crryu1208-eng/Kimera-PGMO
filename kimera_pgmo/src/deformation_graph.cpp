@@ -502,6 +502,14 @@ bool DeformationGraph::addNewMeshNode(const gtsam::Key& node_key,
   }
 
   values_->insert(node_key, node_pose);
+  if (mesh_level_variance_ > 0.0) {
+    // Pose3 tangent order: rotation x y z, translation; only roll / pitch held
+    gtsam::Vector6 variances;
+    variances << mesh_level_variance_, mesh_level_variance_, 1.0e6, 1.0e6, 1.0e6, 1.0e6;
+    known_inliers_->insert(nfg_->size());
+    nfg_->add(gtsam::PriorFactor<gtsam::Pose3>(
+        node_key, node_pose, gtsam::noiseModel::Diagonal::Variances(variances)));
+  }
   return true;
 }
 

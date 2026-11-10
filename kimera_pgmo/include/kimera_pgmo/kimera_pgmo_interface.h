@@ -75,6 +75,8 @@ struct KimeraPgmoConfig {
   double prior_variance = -1.0;
   double mesh_edge_variance = -1.0;
   double pose_mesh_variance = -1.0;
+  // roll / pitch prior on mesh nodes (<= 0: none), see DeformationGraph::setMeshLevelVariance
+  double mesh_level_variance = -1.0;
   // logging
   std::string log_path;
 

@@ -55,6 +55,7 @@ void declare_config(KimeraPgmoConfig& config) {
     field(config.prior_variance, "prior");
     field(config.mesh_edge_variance, "mesh_mesh");
     field(config.pose_mesh_variance, "pose_mesh");
+    field(config.mesh_level_variance, "mesh_level");
   }
 
   field(config.optimizer, "optimizer");
@@ -76,6 +77,7 @@ KimeraPgmoInterface::KimeraPgmoInterface(const KimeraPgmoConfig& config)
       deformation_graph_(new DeformationGraph(config_.mode == RunMode::MESH_ONLY)),
       num_loop_closures_(0) {
   pgo_->setLogPath(config.log_path);
+  deformation_graph_->setMeshLevelVariance(config_.mesh_level_variance);
 }
 
 bool KimeraPgmoInterface::loadGraphAndMesh(size_t robot_id,
@@ -139,6 +141,7 @@ bool KimeraPgmoInterface::wasFullMeshUpdated(bool clear_flag) {
 
 void KimeraPgmoInterface::resetDeformationGraph() {
   deformation_graph_.reset(new DeformationGraph);
+  deformation_graph_->setMeshLevelVariance(config_.mesh_level_variance);
 }
 
 void KimeraPgmoInterface::loadDeformationGraphFromFile(const std::string& input) {

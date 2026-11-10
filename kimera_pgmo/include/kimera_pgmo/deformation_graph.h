@@ -245,6 +245,12 @@ class DeformationGraph {
    */
   void removePriorsWithPrefix(const char& prefix);
 
+  /*! \brief Keep new mesh nodes level: a prior on their roll / pitch (world x / y rotation)
+   * with this variance, yaw and position free; <= 0 (default) adds none. For a map whose
+   * odometry is levelled with gravity, so a large yaw loop closure cannot tilt the mesh.
+   */
+  void setMeshLevelVariance(double variance) { mesh_level_variance_ = variance; }
+
   /*! \brief Get the optimized estimates for nodes with certain prefix
    *  - prefix: prefix of the nodes to query best estimate
    */
@@ -698,6 +704,7 @@ class DeformationGraph {
 
  private:
   bool add_init_vertex_prior_;
+  double mesh_level_variance_ = -1.0;
   bool verbose_;
 
   // Keep track of vertices not part of mesh
