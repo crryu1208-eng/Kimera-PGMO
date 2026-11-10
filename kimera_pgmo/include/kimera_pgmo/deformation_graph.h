@@ -126,6 +126,13 @@ class DeformationGraph {
                          const gtsam::Pose3& meas,
                          double variance = 1e-4);
 
+  /*! \brief Add a new between factor with its own noise model (e.g. a full covariance)
+   */
+  void processNewBetween(const gtsam::Key& key_from,
+                         const gtsam::Key& key_to,
+                         const gtsam::Pose3& meas,
+                         const gtsam::SharedNoiseModel& noise);
+
   /*! \brief Adding new initial guess according to an odometry measurement
    *  - key_from: Key of front node to connect between factor
    *  - key_to: Key of back node to connect between factor
@@ -613,6 +620,13 @@ class DeformationGraph {
                      const gtsam::Key& key_to,
                      const gtsam::Pose3& meas,
                      double variance,
+                     bool temp = false,
+                     bool known_inlier = false);
+
+  void addNewBetween(const gtsam::Key& key_from,
+                     const gtsam::Key& key_to,
+                     const gtsam::Pose3& meas,
+                     const gtsam::SharedNoiseModel& noise,
                      bool temp = false,
                      bool known_inlier = false);
 

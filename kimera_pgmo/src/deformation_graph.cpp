@@ -345,6 +345,17 @@ void DeformationGraph::processNewBetween(const gtsam::Key& key_from,
   addNewBetween(key_from, key_to, meas, variance);
 }
 
+void DeformationGraph::processNewBetween(const gtsam::Key& key_from,
+                                         const gtsam::Key& key_to,
+                                         const gtsam::Pose3& meas,
+                                         const gtsam::SharedNoiseModel& noise) {
+  if (!checkNewBetween(key_from, key_to)) {
+    return;
+  }
+
+  addNewBetween(key_from, key_to, meas, noise);
+}
+
 bool DeformationGraph::checkNewBetween(const gtsam::Key& key_from,
                                        const gtsam::Key& key_to) const {
   const char& from_prefix = gtsam::Symbol(key_from).chr();
@@ -399,8 +410,20 @@ void DeformationGraph::addNewBetween(const gtsam::Key& key_from,
   gtsam::Vector6 variances;
   variances.head<3>().setConstant(1e-02 * variance);
   variances.tail<3>().setConstant(variance);
-  const gtsam::SharedNoiseModel noise =
-      gtsam::noiseModel::Diagonal::Variances(variances);
+  addNewBetween(key_from,
+                key_to,
+                meas,
+                gtsam::noiseModel::Diagonal::Variances(variances),
+                temp,
+                known_inlier);
+}
+
+void DeformationGraph::addNewBetween(const gtsam::Key& key_from,
+                                     const gtsam::Key& key_to,
+                                     const gtsam::Pose3& meas,
+                                     const gtsam::SharedNoiseModel& noise,
+                                     bool temp,
+                                     bool known_inlier) {
   if (temp) {
     if (known_inlier) {
       temp_known_inliers_->insert(temp_nfg_->size());
